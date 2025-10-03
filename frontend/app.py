@@ -36,7 +36,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Header
-st.markdown('<h1 class="main-header">⚡ Electric Vehicle Route Planner</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header"> Electric Vehicle Route Planner</h1>', unsafe_allow_html=True)
 
 # Sidebar for input
 with st.sidebar:
@@ -78,7 +78,7 @@ if calculate_btn:
                 # Fastest Route
                 with col1:
                     st.markdown('<div class="route-card fastest-route">', unsafe_allow_html=True)
-                    st.subheader("🚀 Fastest Route")
+                    st.subheader(" Fastest Route")
                     st.metric("Total Time", f"{data['total_fastest_time']:.1f} min")
                     st.metric("Total Cost", f"€{data['total_fastest_cost']:.2f}")
                     
@@ -86,10 +86,10 @@ if calculate_btn:
                     for i, step in enumerate(data['fastest_route'], 1):
                         st.write(f"{i}. {step['instruction']}")
                         if step['distance'] > 0:
-                            st.write(f"   📏 Distance: {step['distance']:.1f} km")
-                        st.write(f"   ⏱️ Duration: {step['duration']:.1f} min")
+                            st.write(f"    Distance: {step['distance']:.1f} km")
+                        st.write(f"   Duration: {step['duration']:.1f} min")
                         if step['charge_time'] > 0:
-                            st.write(f"   ⚡ Charge Time: {step['charge_time']} min")
+                            st.write(f"   Charge Time: {step['charge_time']} min")
                         st.write("---")
                     
                     st.markdown('</div>', unsafe_allow_html=True)
@@ -97,7 +97,7 @@ if calculate_btn:
                 # Cheapest Route
                 with col2:
                     st.markdown('<div class="route-card cheapest-route">', unsafe_allow_html=True)
-                    st.subheader("💰 Cheapest Route")
+                    st.subheader(" Cheapest Route")
                     st.metric("Total Time", f"{data['total_cheapest_time']:.1f} min")
                     st.metric("Total Cost", f"€{data['total_cheapest_cost']:.2f}")
                     
@@ -105,10 +105,10 @@ if calculate_btn:
                     for i, step in enumerate(data['cheapest_route'], 1):
                         st.write(f"{i}. {step['instruction']}")
                         if step['distance'] > 0:
-                            st.write(f"   📏 Distance: {step['distance']:.1f} km")
-                        st.write(f"   ⏱️ Duration: {step['duration']:.1f} min")
+                            st.write(f"    Distance: {step['distance']:.1f} km")
+                        st.write(f"    Duration: {step['duration']:.1f} min")
                         if step['charge_time'] > 0:
-                            st.write(f"   ⚡ Charge Time: {step['charge_time']} min")
+                            st.write(f"    Charge Time: {step['charge_time']} min")
                         st.write("---")
                     
                     st.markdown('</div>', unsafe_allow_html=True)
@@ -146,7 +146,7 @@ if calculate_btn:
 else:
     # Welcome message
     st.markdown("""
-    ## Welcome to EV Route Planner! 🚗⚡
+    ## Welcome to EV Route Planner! 
     
     This app helps you find the **fastest** and **cheapest** routes for your electric vehicle journey.
     
@@ -157,10 +157,10 @@ else:
     4. Click "Calculate Routes"
     
     ### Features:
-    - ⚡ Electric vehicle optimized routing
-    - 🔋 Charging station consideration
-    - ⏱️ Time and cost calculations
-    - 📊 Route comparison
+    - Electric vehicle optimized routing
+    - Charging station consideration
+    - Time and cost calculations
+    - Route comparison
     
     *Note: This is a learning prototype using mock data.*
     """)
