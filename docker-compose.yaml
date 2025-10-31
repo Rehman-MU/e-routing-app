@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: evr_db
+    environment:
+      POSTGRES_DB: evr
+      POSTGRES_USER: evr
+      POSTGRES_PASSWORD: evrpass
+    ports: ["5432:5432"]
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: evr_redis
+    ports: ["6379:6379"]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: evr_backend
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://evr:evrpass@db:5432/evr}
+      OSRM_BASE_URL: ${OSRM_BASE_URL:-https://router.project-osrm.org}
+      PHOTON_BASE_URL: ${PHOTON_BASE_URL:-https://photon.komoot.io}
+      OCM_BASE_URL: ${OCM_BASE_URL:-https://api.openchargemap.io/v3/poi}
+      OCM_API_KEY: ${OCM_API_KEY:-}
+      REDIS_URL: ${REDIS_URL:-redis://evr_redis:6379/0}
+      APP_SECRET_KEY: ${APP_SECRET_KEY:-change-me}
+    depends_on: [db, redis]
+    ports: ["8000:8000"]
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: evr_frontend
+    env_file:
+      - .env
+    environment:
+      BACKEND_URL: ${BACKEND_URL:-http://evr_backend:8000}
+    depends_on: [backend]
+    ports: ["8501:8501"]
+    command: streamlit run streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+
+volumes:
+  dbdata:

@@ -1,0 +1,21 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import autocomplete, route, stations, plan
+from core.config import settings
+
+app = FastAPI(title="EV Routing Prototype", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], allow_credentials=True,
+    allow_methods=["*"], allow_headers=["*"],
+)
+
+app.include_router(autocomplete.router, prefix="/api/v1", tags=["autocomplete"])
+app.include_router(route.router,         prefix="/api/v1", tags=["route"])
+app.include_router(stations.router,      prefix="/api/v1", tags=["stations"])
+app.include_router(plan.router,          prefix="/api/v1", tags=["plan"])
+
+@app.get("/health")
+async def health():
+    return {"ok": True, "env": settings.model_dump()}
