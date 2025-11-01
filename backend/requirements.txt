@@ -12,3 +12,5 @@ orjson==3.10.7
 python-dotenv==1.0.1
 geopy==2.4.1
 shapely==2.0.6
+polyline==1.4.0
+
