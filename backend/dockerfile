@@ -1,12 +1,21 @@
 FROM python:3.11-slim
 
 WORKDIR /app
+
+# system deps (psycopg needs these runtime libs)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# copy app source
 COPY . .
-# optional: seed will run when container starts via a health/entry script; we keep manual to be explicit
 
-RUN chmod +x /app/start.sh
+# fix Windows CRLF and ensure executable bit
+RUN sed -i 's/\r$//' /app/start.sh && chmod +x /app/start.sh
 
 EXPOSE 8000
+# you can keep CMD or rely on compose 'command'; both fine
+CMD ["/app/start.sh"]
