@@ -61,6 +61,27 @@ def make_scatter_layer(points, radius=200, color=None, pickable=False, tooltip=F
     )
     return layer
 
+def make_flag_layer(points, is_start=True):
+    """
+    Create flag icons for start and end points
+    is_start: True for start flag (green), False for end flag (red)
+    """
+    icon_data = [{
+        "position": point["position"],
+        "icon": "flag",
+        "color": [0, 255, 0, 255] if is_start else [255, 0, 0, 255]  # Green for start, Red for end
+    } for point in points]
+    
+    return pdk.Layer(
+        "IconLayer",
+        data=icon_data,
+        get_icon="icon",
+        get_size=4,
+        size_scale=15,
+        get_position="position",
+        get_color="color",
+        pickable=True,
+    )
 # ----------------------------
 # UI
 # ----------------------------
