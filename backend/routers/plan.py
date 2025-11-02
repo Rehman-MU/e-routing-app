@@ -9,6 +9,7 @@ from db import get_db
 from sqlalchemy.orm import Session
 from models import Query as MQuery, Plan as MPlan, Vehicle as MVehicle
 import math
+from services.ocm import stations_along_line
 
 router = APIRouter()
 
@@ -97,11 +98,14 @@ async def ev_plan_ep(body: PlanIn, db: Session = Depends(get_db)):
 
     # stations near route
     try:
-        bbox = bbox_around_line(line["coordinates"], buffer_km=7.5)
-        ocm = await stations_in_bbox(*bbox, maxresults=120)
-    except httpx.HTTPError as e:
+        ocm = await stations_along_line(
+            line["coordinates"], 
+            radius_km=7.0,
+            max_per_call=80, 
+            approx_calls=12)
+    except httpx.HTTPError:
         ocm = []  # degrade gracefully
-        
+
     # naive filter: within 5km of the polyline
     ls = LineString(line["coordinates"])
     candidates = []
