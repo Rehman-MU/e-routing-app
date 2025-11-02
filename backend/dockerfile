@@ -7,4 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 # optional: seed will run when container starts via a health/entry script; we keep manual to be explicit
 
+RUN chmod +x /app/start.sh
+
 EXPOSE 8000
