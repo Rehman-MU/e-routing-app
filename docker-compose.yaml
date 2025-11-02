@@ -11,11 +11,15 @@ services:
     ports: ["5432:5432"]
     volumes:
       - dbdata:/var/lib/postgresql/data
+    networks:
+      - evr-network
 
   redis:
     image: redis:7
     container_name: evr_redis
     ports: ["6379:6379"]
+    networks:
+      - evr-network
 
   backend:
     build:
@@ -32,9 +36,13 @@ services:
       OCM_API_KEY: ${OCM_API_KEY:-}
       REDIS_URL: ${REDIS_URL:-redis://evr_redis:6379/0}
       APP_SECRET_KEY: ${APP_SECRET_KEY:-change-me}
-    depends_on: [db, redis]
+    depends_on: 
+      - db
+      - redis
     ports: ["8000:8000"]
     command: ["/app/start.sh"]
+    networks:
+      - evr-network
 
   frontend:
     build:
@@ -45,9 +53,16 @@ services:
       - .env
     environment:
       BACKEND_URL: ${BACKEND_URL:-http://evr_backend:8000}
-    depends_on: [backend]
+    depends_on: 
+      - backend
     ports: ["8501:8501"]
     command: streamlit run streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    networks:
+      - evr-network
+
+networks:
+  evr-network:
+    driver: bridge
 
 volumes:
   dbdata:
