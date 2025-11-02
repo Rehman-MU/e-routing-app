@@ -46,6 +46,11 @@ if go:
         "vehicle_id": veh_id
     }
     r = requests.post(f"{BACKEND}/api/v1/ev-plan", json=body, timeout=30)
+    #  error handeling
+    if r.status_code != 200:
+        st.error(f"Backend error {r.status_code}:\n\n{r.text[:500]}")
+        st.stop() 
+        
     data = r.json()
 
     for label in ["fastest", "cheapest"]:
