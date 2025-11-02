@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+import httpx
 from pydantic import BaseModel, Field
 from shapely.geometry import LineString, Point
 from shapely.ops import nearest_points
@@ -72,11 +73,15 @@ def plan_one_stop(route_km: float, start_soc: float, arrival_soc: float, veh: MV
 async def ev_plan_ep(body: PlanIn, db: Session = Depends(get_db)):
     veh = db.query(MVehicle).filter(MVehicle.id == body.vehicle_id).first()
     if not veh:
-        raise ValueError("vehicle not found")
+        raise HTTPException(status_code=404, detail="vehicle not found")
 
-    r = await osrm_route(body.start[0], body.start[1], body.end[0], body.end[1])
+    try:
+        r = await osrm_route(body.start[0], body.start[1], body.end[0], body.end[1])
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=503, detail=f"OSRM unavailable: {e!s}")
+    
     if not r:
-        return {"fastest": {"error": "NoRoute"}, "cheapest": {"error": "NoRoute"}}
+        raise HTTPException(status_code=502, detail="NoRoute")
 
     route_km = r["distance_km"]
     line = r["line"]
@@ -91,8 +96,12 @@ async def ev_plan_ep(body: PlanIn, db: Session = Depends(get_db)):
     db.add(q); db.commit(); db.refresh(q)
 
     # stations near route
-    bbox = bbox_around_line(line["coordinates"], buffer_km=7.5)
-    ocm = await stations_in_bbox(*bbox, maxresults=120)
+    try:
+        bbox = bbox_around_line(line["coordinates"], buffer_km=7.5)
+        ocm = await stations_in_bbox(*bbox, maxresults=120)
+    except httpx.HTTPError as e:
+        ocm = []  # degrade gracefully
+        
     # naive filter: within 5km of the polyline
     ls = LineString(line["coordinates"])
     candidates = []
