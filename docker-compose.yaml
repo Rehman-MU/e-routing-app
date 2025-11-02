@@ -34,7 +34,7 @@ services:
       APP_SECRET_KEY: ${APP_SECRET_KEY:-change-me}
     depends_on: [db, redis]
     ports: ["8000:8000"]
-    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    command: ["/app/start.sh"]
 
   frontend:
     build:
