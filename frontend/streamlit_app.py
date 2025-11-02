@@ -50,7 +50,10 @@ if go:
     if r.status_code != 200:
         st.error(f"Backend error {r.status_code}:\n\n{r.text[:500]}")
         st.stop() 
-        
+    if not r.ok:
+        st.error(f"Backend error {r.status_code}:\n\n{r.text[:800]}")
+        st.stop()
+
     data = r.json()
 
     for label in ["fastest", "cheapest"]:
