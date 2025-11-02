@@ -140,4 +140,7 @@ async def ev_plan_ep(body: PlanIn, db: Session = Depends(get_db)):
     ])
     db.commit()
 
-    return {"fastest": fastest, "cheapest": cheapest}
+    return {"fastest": fastest, 
+            "cheapest": cheapest,
+            "chargers": candidates
+            }
