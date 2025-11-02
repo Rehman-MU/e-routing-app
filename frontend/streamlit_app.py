@@ -9,22 +9,34 @@ st.title("🔌 EV Routing Prototype")
 
 # ----------------------------
 # Helpers
-# ----------------------------
 def typeahead(label: str):
     q = st.text_input(label)
     choice = None
     if len(q) >= 3:
-        r = requests.get(f"{BACKEND}/api/v1/autocomplete",
-                         params={"q": q, "limit": 5}, timeout=10)
-        if r.ok:
-            opts = r.json()
-            labels = [o["label"] for o in opts]
-            idx = st.selectbox("Suggestions", range(len(labels)),
-                               format_func=lambda i: labels[i]) if labels else None
-            if idx is not None:
-                choice = opts[idx]
-        else:
-            st.warning(f"Autocomplete error {r.status_code}: {r.text[:200]}")
+        try:
+            r = requests.get(
+                f"{BACKEND}/api/v1/autocomplete",
+                params={"q": q, "limit": 5}, 
+                timeout=10
+            )
+            if r.ok:
+                opts = r.json()
+                labels = [o["label"] for o in opts]
+                if labels:
+                    idx = st.selectbox(
+                        "Suggestions", 
+                        range(len(labels)),
+                        format_func=lambda i: labels[i],
+                        key=f"suggestions_{label}"  # Unique key for each typeahead
+                    )
+                    if idx is not None:
+                        choice = opts[idx]
+            else:
+                st.warning(f"Autocomplete error {r.status_code}: {r.text[:200]}")
+        except requests.exceptions.ConnectionError:
+            st.error(f"⚠️ Cannot connect to backend at {BACKEND}. Please check if the backend service is running.")
+        except requests.exceptions.RequestException as e:
+            st.warning(f"Network error: {e}")
     return choice
 
 def make_route_layer(route_coords):
