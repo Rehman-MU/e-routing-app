@@ -67,3 +67,37 @@ async def stations_along_line(line_coords: List[List[float]],
             seen.add(oid)
             out.append(slim)
     return out
+
+# ADDED: Missing function that was causing the ImportError
+async def stations_in_bbox(min_lon: float, min_lat: float, max_lon: float, max_lat: float, maxresults: int = 80) -> List[Dict]:
+    """
+    Query OCM for stations within a bounding box.
+    """
+    params = {
+        "output": "json",
+        "boundingbox": f"{min_lat},{min_lon},{max_lat},{max_lon}",
+        "maxresults": maxresults,
+        "compact": "true",
+        "verbose": "false",
+        "countrycode": "DE",  # focus on Germany for now
+    }
+    
+    async with httpx.AsyncClient(timeout=15) as client:
+        try:
+            r = await client.get(f"{OCM_URL}", params=params)
+            if r.status_code != 200:
+                return []
+            data = r.json()
+            
+            # Convert to slim format and filter valid coordinates
+            stations = []
+            seen_ids = set()
+            for rec in data:
+                slim = _slim(rec)
+                if slim["lon"] and slim["lat"] and slim["ocm_id"] not in seen_ids:
+                    seen_ids.add(slim["ocm_id"])
+                    stations.append(slim)
+            
+            return stations
+        except httpx.RequestError:
+            return []
