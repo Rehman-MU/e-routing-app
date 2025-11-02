@@ -82,6 +82,28 @@ def make_flag_layer(points, is_start=True):
         get_color="color",
         pickable=True,
     )
+
+def make_charging_layer(points):
+    """
+    Create charging station icons
+    """
+    icon_data = [{
+        "position": point["position"],
+        "icon": "charging-station",
+        "color": [255, 200, 0, 255]  # Amber color
+    } for point in points]
+    
+    return pdk.Layer(
+        "IconLayer",
+        data=icon_data,
+        get_icon="icon",
+        get_size=3,
+        size_scale=15,
+        get_position="position",
+        get_color="color",
+        pickable=True,
+    )
+
 # ----------------------------
 # UI
 # ----------------------------
@@ -145,17 +167,17 @@ if go:
         if coords:
             layers.append(make_route_layer(coords))
 
-        # Start / End pins (green/red)
+        # Start / End flags (using IconLayer instead of ScatterplotLayer)
         if coords:
-            layers.append(make_scatter_layer(
+            # Start flag (green)
+            layers.append(make_flag_layer(
                 [{"position": coords[0]}],
-                radius=250,
-                color=[20, 200, 90, 220],   # green
+                is_start=True
             ))
-            layers.append(make_scatter_layer(
+            # End flag (red)
+            layers.append(make_flag_layer(
                 [{"position": coords[-1]}],
-                radius=250,
-                color=[220, 50, 50, 220],   # red
+                is_start=False
             ))
 
         # All corridor chargers as small gray dots
@@ -166,19 +188,12 @@ if go:
                 color=[180, 180, 180, 160],
             ))
 
-        # Selected charging stops: bigger + tooltip
+        # Selected charging stops: use charging station icons
         if stops:
             stop_points = [{"position": [s["lon"], s["lat"]],
                             "name": s.get("name", "Charger"),
                             "minutes": s.get("charge_min", 0)} for s in stops]
-            layers.append(pdk.Layer(
-                "ScatterplotLayer",
-                data=stop_points,
-                get_position="position",
-                get_radius=220,
-                pickable=True,
-                get_fill_color=[255, 200, 60, 220],  # amber-ish
-            ))
+            layers.append(make_charging_layer(stop_points))
             tooltip = {"text": "{name}\n{minutes} min"}
         else:
             tooltip = None
